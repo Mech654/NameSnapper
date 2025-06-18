@@ -181,6 +181,84 @@
     }
   }
 
+  function saveMarkedNamesToStorage() {
+    const highlightedSpans = document.querySelectorAll('span[style*="background-color: yellow"]');
+    const markedNames = new Set();
+    
+    highlightedSpans.forEach(span => {
+      const name = span.textContent.trim();
+      if (name) {
+        markedNames.add(name);
+      }
+    });
+    
+    const existingNames = JSON.parse(localStorage.getItem('markedNames') || '[]');
+    const existingNamesSet = new Set(existingNames);
+    
+    markedNames.forEach(name => existingNamesSet.add(name));
+    
+    const finalNames = Array.from(existingNamesSet).sort();
+    localStorage.setItem('markedNames', JSON.stringify(finalNames));
+    
+    console.log(`Saved ${markedNames.size} new names to localStorage. Total: ${finalNames.length}`);
+    console.log('New names found:', Array.from(markedNames));
+  }
+
+  function markKnownNames() {
+    const knownNames = JSON.parse(localStorage.getItem('markedNames') || '[]');
+    if (knownNames.length === 0) return;
+    
+    console.log(`Second pass: marking ${knownNames.length} known names`);
+    
+    const walker = document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode(node) {
+          if (!node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+          const p = node.parentElement;
+          if (isSkippable(p)) return NodeFilter.FILTER_REJECT;
+          if (p.style && p.style.backgroundColor === 'yellow') return NodeFilter.FILTER_REJECT;
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      },
+      false
+    );
+
+    const textNodes = [];
+    let textNode;
+    while (textNode = walker.nextNode()) {
+      textNodes.push(textNode);
+    }
+    
+    textNodes.forEach(node => {
+      const txt = node.nodeValue;
+      const matches = [];
+      
+      knownNames.forEach(name => {
+        const nameRegex = new RegExp('\\b' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g');
+        let match;
+        while ((match = nameRegex.exec(txt))) {
+          const isAlreadyHighlighted = matches.some(m => 
+            (match.index >= m.start && match.index < m.start + m.length) ||
+            (match.index + name.length > m.start && match.index + name.length <= m.start + m.length)
+          );
+          
+          if (!isAlreadyHighlighted) {
+            matches.push({ name, start: match.index, length: name.length });
+          }
+        }
+      });
+      
+      matches.sort((a, b) => b.start - a.start);
+      
+      matches.forEach(match => {
+        highlight(node, match.start, match.length);
+        console.log(`Second pass marked: "${match.name}" at index ${match.start}`);
+      });
+    });
+  }
+
   function MarkNames() {
     console.log('MarkNames dynamic detection');
     const fullText = document.body.textContent || '';
@@ -209,6 +287,8 @@
     textNodes.forEach(node => processTextNode(node, wordAnalysis));
     
     mergeAdjacentNames();
+    saveMarkedNamesToStorage();
+    markKnownNames();
   }
 
   MarkNames();
