@@ -41,7 +41,7 @@
       analysis.count++;
       analysis.contexts.push({ before, after });
       
-      if (/[.!?]\s*$/.test(before)) {
+      if (/[.!?'"]\s*$/.test(before) || /^\s*['"]/.test(before.trim())) {
         analysis.afterPunctuation++;
       } else {
         analysis.midSentence++;
@@ -84,7 +84,7 @@
     const txt = textNode.nodeValue;
     const beforeMatch = txt.slice(0, matchIndex);
     
-    if (beforeMatch.trim() === '' || /[-]\s*$/.test(beforeMatch)) {
+    if (beforeMatch.trim() === '' || /[-'"]\s*$/.test(beforeMatch) || /^\s*['"]/.test(beforeMatch)) {
       const parent = textNode.parentElement;
       if (!parent) return true;
       
@@ -103,7 +103,7 @@
       return true;
     }
     
-    return /^\s*$/.test(beforeMatch) || /[-]\s*$/.test(beforeMatch);
+    return /^\s*$/.test(beforeMatch) || /[-'"]\s*$/.test(beforeMatch);
   }
 
   function processTextNode(textNode, wordAnalysis) {
