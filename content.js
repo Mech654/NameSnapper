@@ -105,7 +105,7 @@
     return /^\s*$/.test(beforeMatch) || sentenceStarters.test(beforeMatch);
   }
 
-  function processTextNode(textNode, wordAnalysis) {
+  function processTextNode(textNode, wordAnalysis, blacklistedNames = []) {
     const txt = textNode.nodeValue;
     
     const capRE = /\b([A-Z][a-z]+(?:-[A-Z][a-z]+)*)\b/g;
@@ -117,6 +117,11 @@
       const matchIndex = match.index;
       
       if (isFirstWordInElement(textNode, matchIndex)) {
+        continue;
+      }
+      
+      // Skip if name is blacklisted
+      if (blacklistedNames.includes(word)) {
         continue;
       }
       
@@ -189,6 +194,7 @@
       }
     });
     
+    // Get existing names from localStorage (for backward compatibility)
     const existingNames = JSON.parse(localStorage.getItem('markedNames') || '[]');
     const existingNamesSet = new Set(existingNames);
     
@@ -196,6 +202,14 @@
     
     const finalNames = Array.from(existingNamesSet).sort();
     localStorage.setItem('markedNames', JSON.stringify(finalNames));
+    
+    // Also save to browser storage for consistency
+    if (typeof browser !== 'undefined' && browser.runtime) {
+      browser.runtime.sendMessage({
+        action: 'saveMarkedNames',
+        names: Array.from(markedNames)
+      });
+    }
   }
 
 
@@ -430,7 +444,7 @@
     return depth;
   }
 
-  function markNamesInElement(element = document.body) {
+  function markNamesInElement(element = document.body, blacklistedNames = []) {
     const fullText = element.textContent || '';
     const wordAnalysis = analyzeWordPatterns(fullText);
     
@@ -454,10 +468,23 @@
       textNodes.push(textNode);
     }
     
-    textNodes.forEach(node => processTextNode(node, wordAnalysis));
+    textNodes.forEach(node => processTextNode(node, wordAnalysis, blacklistedNames));
   }
 
   function MarkNames() {
+    // Get blacklisted names from storage first
+    if (typeof browser !== 'undefined' && browser.runtime) {
+      browser.runtime.sendMessage({action: 'getBlacklistedNames'}, function(response) {
+        const blacklistedNames = response && response.names ? response.names : [];
+        processWithBlacklist(blacklistedNames);
+      });
+    } else {
+      // Fallback for when browser runtime is not available
+      processWithBlacklist([]);
+    }
+  }
+  
+  function processWithBlacklist(blacklistedNames) {
     const contentElements = findContentRichElements();
     
     if (contentElements.length === 0) {
@@ -468,7 +495,7 @@
     contentElements.forEach((element, index) => {
       const xpath = getElementXPath(element);
       console.log(`Marking names in: ${element.tagName} - XPath: ${xpath}`);
-      markNamesInElement(element);
+      markNamesInElement(element, blacklistedNames);
     });
     
     // Merge adjacent names across all processed elements
@@ -524,5 +551,81 @@
     return '/html/body' + path;
   }
 
-  MarkNames();
+  // Message handler for popup/background communication
+  browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request.action === 'startNameMarking') {
+      try {
+        // Clear any existing highlights first
+        removeAllHighlights();
+        
+        // Run the main MarkNames function
+        MarkNames();
+        
+        // Count marked names
+        const highlightedSpans = document.querySelectorAll('span[style*="background-color: yellow"]');
+        const markedCount = highlightedSpans.length;
+        
+        // Send names to background script for storage
+        const markedNames = Array.from(highlightedSpans).map(span => span.textContent.trim());
+        if (markedNames.length > 0) {
+          browser.runtime.sendMessage({
+            action: 'saveMarkedNames',
+            names: markedNames
+          });
+        }
+        
+        sendResponse({
+          success: true,
+          markedCount: markedCount,
+          message: `Marked ${markedCount} names on the page`
+        });
+      } catch (error) {
+        console.error('Error in name marking:', error);
+        sendResponse({
+          success: false,
+          error: error.message
+        });
+      }
+      return true;
+    }
+    
+    if (request.action === 'removeHighlights') {
+      try {
+        const removedCount = removeAllHighlights();
+        sendResponse({
+          success: true,
+          removedCount: removedCount,
+          message: `Removed ${removedCount} highlights`
+        });
+      } catch (error) {
+        console.error('Error removing highlights:', error);
+        sendResponse({
+          success: false,
+          error: error.message
+        });
+      }
+      return true;
+    }
+  });
+
+  function removeAllHighlights() {
+    const highlightedSpans = document.querySelectorAll('span[style*="background-color: yellow"]');
+    let removedCount = 0;
+    
+    highlightedSpans.forEach(span => {
+      // Replace the span with its text content
+      const parent = span.parentNode;
+      const textNode = document.createTextNode(span.textContent);
+      parent.replaceChild(textNode, span);
+      removedCount++;
+    });
+    
+    // Normalize text nodes to merge adjacent ones
+    document.normalize();
+    
+    return removedCount;
+  }
+
+  // Don't run automatically - wait for user action
+  // MarkNames() is now called via message from popup
 })();

@@ -2,11 +2,12 @@
   "manifest_version": 2,
   "name": "NameSnapper",
   "version": "1.0.0",
-  "description": "A Firefox extension for snapping names and text content",
+  "description": "Intelligent character name detection and highlighting for web novels and stories. Automatically identifies and marks character names in chapter content.",
   
   "permissions": [
     "activeTab",
-    "storage"
+    "storage",
+    "contextMenus"
   ],
   
   "background": {
@@ -17,29 +18,33 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"]
+      "js": ["content.js"],
+      "run_at": "document_end"
     }
   ],
   
   "browser_action": {
     "default_popup": "popup.html",
-    "default_title": "NameSnapper",
+    "default_title": "NameSnapper - Smart Name Detection",
     "default_icon": {
-      "16": "icons/icon-16.png",
-      "32": "icons/icon-32.png",
-      "48": "icons/icon-48.png",
-      "128": "icons/icon-128.png"
+      "16": "marker.png",
+      "32": "marker.png",
+      "48": "marker.png",
+      "128": "marker.png"
     }
   },
   
   "icons": {
-    "16": "icons/icon-16.png",
-    "32": "icons/icon-32.png",
-    "48": "icons/icon-48.png",
-    "128": "icons/icon-128.png"
+    "16": "marker.png",
+    "32": "marker.png", 
+    "48": "marker.png",
+    "128": "marker.png"
   },
   
   "web_accessible_resources": [
-    "icons/*"
-  ]
+    "marker.png"
+  ],
+  
+  "author": "NameSnapper Team",
+  "homepage_url": "https://github.com/namesnapper/extension"
 }
