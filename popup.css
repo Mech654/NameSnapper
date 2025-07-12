@@ -1,0 +1,232 @@
+body {
+  width: 380px;
+  padding: 20px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  margin: 0;
+  color: white;
+  font-size: 22px;
+  font-weight: 300;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.subtitle {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-top: 5px;
+}
+
+.button {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.button.primary {
+  background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+  border: none;
+}
+
+.button.primary:hover {
+  background: linear-gradient(45deg, #ee5a24, #ff6b6b);
+}
+
+.names-list {
+  height: auto;
+  overflow-y: auto;
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.name-item {
+  padding: 6px 10px;
+  margin: 4px 0;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.name-item:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateX(2px);
+}
+
+.name-text {
+  flex: 1;
+  margin-right: 10px;
+}
+
+.remove-btn {
+  background: rgba(231, 76, 60, 0.8);
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-btn:hover {
+  background: rgba(231, 76, 60, 1);
+  transform: scale(1.1);
+}
+
+.hidden {
+  display: none;
+}
+
+.stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  font-size: 11px;
+  opacity: 0.8;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.success {
+  color: #2ecc71;
+  font-weight: bold;
+}
+
+.error {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.search-container {
+  margin: 10px 0;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 35px 8px 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  color: white;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.search-clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: none;
+}
+
+.search-clear:hover {
+  color: white;
+}
+
+.tabs {
+  display: flex;
+  margin-bottom: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.tab {
+  flex: 1;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 12px;
+  transition: all 0.3s ease;
+}
+
+.tab.active {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.tab:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.blacklisted-item {
+  background: rgba(231, 76, 60, 0.2);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.blacklisted-item .remove-btn {
+  background: rgba(46, 204, 113, 0.8);
+}
+
+.blacklisted-item .remove-btn:hover {
+  background: rgba(46, 204, 113, 1);
+}
+
+.no-results {
+  text-align: center;
+  padding: 20px;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+}

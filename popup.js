@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const removeHighlightsBtn = document.getElementById('removeHighlights');
   const viewNamesBtn = document.getElementById('viewNames');
   const clearNamesBtn = document.getElementById('clearNames');
-  const status = document.getElementById('status');
   const nameCount = document.getElementById('nameCount');
   const blacklistCount = document.getElementById('blacklistCount');
   const namesList = document.getElementById('namesList');
@@ -25,7 +24,6 @@ document.addEventListener('DOMContentLoaded', function() {
   function init() {
     updateNameCount();
     updateBlacklistCount();
-    showStatus('Ready to detect names! Click "Mark Names" to analyze the current page.', 'info');
     setupEventListeners();
   }
 
@@ -73,18 +71,6 @@ document.addEventListener('DOMContentLoaded', function() {
     displayCurrentTab();
   }
 
-  // Show status message
-  function showStatus(message, type = 'info') {
-    status.textContent = message;
-    status.className = `status ${type}`;
-    
-    if (type === 'success' || type === 'error') {
-      setTimeout(() => {
-        showStatus('Ready to detect names! Click "Mark Names" to analyze the current page.', 'info');
-      }, 3000);
-    }
-  }
-
   // Update name count display
   function updateNameCount() {
     browser.runtime.sendMessage({action: 'getMarkedNames'}, function(response) {
@@ -111,17 +97,13 @@ document.addEventListener('DOMContentLoaded', function() {
   markNamesBtn.addEventListener('click', function() {
     markNamesBtn.classList.add('loading');
     markNamesBtn.textContent = '🔍 Analyzing...';
-    showStatus('Analyzing page content and marking character names...', 'info');
 
     browser.runtime.sendMessage({action: 'runNameMarking'}, function(response) {
       markNamesBtn.classList.remove('loading');
       markNamesBtn.textContent = '🎯 Mark Names on Page';
       
       if (response && response.success) {
-        showStatus(`Successfully marked ${response.markedCount || 0} names on the page!`, 'success');
         updateNameCount();
-      } else {
-        showStatus('Failed to analyze page. Try refreshing and try again.', 'error');
       }
     });
   });
@@ -130,17 +112,10 @@ document.addEventListener('DOMContentLoaded', function() {
   removeHighlightsBtn.addEventListener('click', function() {
     removeHighlightsBtn.classList.add('loading');
     removeHighlightsBtn.textContent = '🧹 Removing...';
-    showStatus('Removing highlights from page...', 'info');
 
     browser.runtime.sendMessage({action: 'removeHighlights'}, function(response) {
       removeHighlightsBtn.classList.remove('loading');
       removeHighlightsBtn.textContent = '🧹 Remove Highlights';
-      
-      if (response && response.success) {
-        showStatus('All highlights removed from page!', 'success');
-      } else {
-        showStatus('Failed to remove highlights.', 'error');
-      }
     });
   });
 
@@ -158,15 +133,13 @@ document.addEventListener('DOMContentLoaded', function() {
       blacklistTabCount.textContent = allBlacklisted.length;
       
       if (allNames.length === 0 && allBlacklisted.length === 0) {
-        showStatus('No names stored yet. Mark some names first!', 'info');
         namesList.classList.add('hidden');
       } else {
         namesList.classList.remove('hidden');
         displayCurrentTab();
-        showStatus(`Loaded ${allNames.length} names and ${allBlacklisted.length} blacklisted`, 'success');
       }
     }).catch(() => {
-      showStatus('Failed to load names.', 'error');
+      // Failed to load names
     });
   });
 
@@ -259,10 +232,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // Refresh display
             displayCurrentTab();
           }, 300);
-          
-          showStatus(`"${name}" has been blacklisted`, 'success');
-        } else {
-          showStatus('Failed to blacklist name.', 'error');
         }
       });
     }
@@ -287,10 +256,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // Refresh display
             displayCurrentTab();
           }, 300);
-          
-          showStatus(`"${name}" removed from blacklist`, 'success');
-        } else {
-          showStatus('Failed to remove from blacklist.', 'error');
         }
       });
     }
@@ -301,13 +266,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (confirm('Are you sure you want to clear all stored names? This cannot be undone.')) {
       browser.runtime.sendMessage({action: 'clearMarkedNames'}, function(response) {
         if (response && response.success) {
-          showStatus('All stored names cleared!', 'success');
           allNames = [];
           updateNameCount();
           namesList.classList.add('hidden');
           namesContent.innerHTML = '';
-        } else {
-          showStatus('Failed to clear names.', 'error');
         }
       });
     }
