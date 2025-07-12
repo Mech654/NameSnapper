@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Display up to 20 items for performance
-    filteredData.slice(0, 20).forEach(name => {
+    filteredData.forEach(name => {
       const nameElement = document.createElement('div');
       nameElement.className = currentTab === 'names' ? 'name-item' : 'name-item blacklisted-item';
       
@@ -197,18 +197,6 @@ document.addEventListener('DOMContentLoaded', function() {
       nameElement.appendChild(actionBtn);
       namesContent.appendChild(nameElement);
     });
-    
-    if (filteredData.length > 20) {
-      const moreElement = document.createElement('div');
-      moreElement.className = 'name-item';
-      moreElement.style.opacity = '0.7';
-      moreElement.style.justifyContent = 'center';
-      
-      const moreText = document.createElement('span');
-      moreText.textContent = `+${filteredData.length - 20} more...`;
-      moreElement.appendChild(moreText);
-      namesContent.appendChild(moreElement);
-    }
   }
 
   // Blacklist a name
